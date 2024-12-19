@@ -18,18 +18,18 @@
                 <Label layoutX="42.0" layoutY="32.0" text="Task Name" />
                 <Label layoutX="42.0" layoutY="76.0" text="Description" />
                 <Label layoutX="45.0" layoutY="123.0" text="Date/Time" />
-                <TextField layoutX="119.0" layoutY="28.0" prefHeight="26.0" prefWidth="282.0" />
-                <TextField layoutX="119.0" layoutY="72.0" prefHeight="26.0" prefWidth="282.0" />
-                <TextField layoutX="119.0" layoutY="118.0" prefHeight="26.0" prefWidth="282.0" />
-                <Button layoutX="119.0" layoutY="172.0" mnemonicParsing="false" text="Add Task" />
-                <Button layoutX="209.0" layoutY="172.0" mnemonicParsing="false" text="Update Task" />
-                <Button layoutX="319.0" layoutY="172.0" mnemonicParsing="false" text="Delete Task" />
+                <TextField fx:id="Input_TaskName" layoutX="119.0" layoutY="28.0" prefHeight="26.0" prefWidth="282.0" />
+                <TextField fx:id="Input_Description" layoutX="119.0" layoutY="72.0" prefHeight="26.0" prefWidth="282.0" />
+                <TextField fx:id="Input_Date" layoutX="119.0" layoutY="118.0" prefHeight="26.0" prefWidth="282.0" />
+                <Button layoutX="119.0" layoutY="172.0" mnemonicParsing="false" onAction="#AddTask" text="Add Task" />
+                <Button layoutX="209.0" layoutY="172.0" mnemonicParsing="false" onAction="#UpdateTask" text="Update Task" />
+                <Button layoutX="319.0" layoutY="172.0" mnemonicParsing="false" onAction="#DeleteTask" text="Delete Task" />
             </children>
         </AnchorPane>
         <AnchorPane prefHeight="317.0" prefWidth="579.0">
             <children>
-                <TextArea layoutX="20.0" layoutY="14.0" prefHeight="200.0" prefWidth="544.0" />
-                <Button layoutX="245.0" layoutY="247.0" mnemonicParsing="false" text="Get All Tasks" />
+                <TextArea fx:id="Textarea_Allbox" layoutX="20.0" layoutY="14.0" prefHeight="200.0" prefWidth="544.0" />
+                <Button layoutX="245.0" layoutY="247.0" mnemonicParsing="false" onAction="#GetAllTasks" text="Get All Tasks" />
             </children>
         </AnchorPane>
     </children>
