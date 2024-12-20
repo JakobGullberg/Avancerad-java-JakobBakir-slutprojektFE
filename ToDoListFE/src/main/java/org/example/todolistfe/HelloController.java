@@ -1,5 +1,6 @@
 package org.example.todolistfe;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,6 +16,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class HelloController {
 //    @FXML
@@ -95,9 +98,8 @@ public class HelloController {
                 Textarea_Allbox.setText("Failed to delete task. HTTP response code: " + responseCode);
             }
 
-            // Dölj popupen och rensa inputfältet
+            // rensa inputfältet
             Input_TaskID.clear();
-            Input_TaskID.setVisible(false);
 
         } catch (NumberFormatException e) {
             Input_TaskID.setPromptText("Invalid ID"); // Felmeddelande för ogiltigt ID
@@ -115,8 +117,25 @@ public class HelloController {
             URL url = new URL("http://localhost:8080/api/tasks");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            String response = readResponse(connection);
-            Textarea_Allbox.setText(response);
+
+            String jsonResponse = readResponse(connection);
+            // Omvandla JSON-svaret till en lista av objekt
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, Object>> tasks = mapper.readValue(jsonResponse, new TypeReference<List<Map<String, Object>>>() {});
+
+            // Bygg upp en snygg sträng
+            StringBuilder formattedResponse = new StringBuilder("Tasks:\n");
+            for (int i = 0; i < tasks.size(); i++) {
+                Map<String, Object> task = tasks.get(i);
+                formattedResponse.append(i + 1).append(". Task:\n");
+                formattedResponse.append("   - ID: ").append(task.get("id")).append("\n");
+                formattedResponse.append("   - Name: ").append(task.get("name")).append("\n");
+                formattedResponse.append("   - Description: ").append(task.get("description")).append("\n");
+                formattedResponse.append("   - Date: ").append(task.get("date")).append("\n\n");
+            }
+
+            // Visa det snyggt formaterade resultatet i Textarea_Allbox
+            Textarea_Allbox.setText(formattedResponse.toString());
 
         } catch (Exception e) {
             Textarea_Allbox.setText("Error" + e.getMessage());
