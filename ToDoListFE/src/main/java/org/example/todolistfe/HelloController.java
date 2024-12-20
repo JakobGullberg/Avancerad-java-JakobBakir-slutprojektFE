@@ -1,14 +1,33 @@
 package org.example.todolistfe;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class HelloController {
+//    @FXML
+//    private AnchorPane popupPane; // Popup-fönster (Task ID input area)
+//    @FXML
+//    private TextField Input_TaskID; // TextField för Task ID i popupen
+
+    @FXML
+    private TextField Input_TaskID;
 
     @FXML
     private TextField Input_Date;
+
 
     @FXML
     private TextField Input_Description;
@@ -21,22 +40,212 @@ public class HelloController {
 
     @FXML
     void AddTask(ActionEvent event) {
+        try {
+            // Läs input från textfälten
+            String date = Input_Date.getText();           // Textfält för datum
+            String taskName = Input_TaskName.getText();   // Textfält för TaskName
+            String description = Input_Description.getText(); // Textfält för Description
 
+            // Skapa en Task-objekt utan ID
+            Task myTask = new Task(0, taskName, description, date); // ID sätts till 0 eller tas bort i modellen
+
+            // Konvertera Task till JSON med ObjectMapper
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(myTask);
+
+
+            URL url = new URL("http://localhost:8080/api/tasks");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            // Skriv JSON-data till servern
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                os.write(input);
+            }
+
+            String response = readResponse(connection);
+            Textarea_Allbox.setText(response);
+        } catch (Exception e) {
+            Textarea_Allbox.setText("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-
     @FXML
     void DeleteTask(ActionEvent event) {
 
+        try {
+            // Läs Task ID från popupen
+            int id = Integer.parseInt(Input_TaskID.getText());
+
+            // Skicka DELETE-begäran till backend
+            URL url = new URL("http://localhost:8080/api/tasks/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("DELETE");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                String response = readResponse(connection);
+                Textarea_Allbox.setText("Task deleted successfully: " + response);
+            } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                Textarea_Allbox.setText("Task with ID " + id + " not found.");
+            } else {
+                Textarea_Allbox.setText("Failed to delete task. HTTP response code: " + responseCode);
+            }
+
+            // Dölj popupen och rensa inputfältet
+            Input_TaskID.clear();
+            Input_TaskID.setVisible(false);
+
+        } catch (NumberFormatException e) {
+            Input_TaskID.setPromptText("Invalid ID"); // Felmeddelande för ogiltigt ID
+        } catch (Exception e) {
+            Textarea_Allbox.setText("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
+
 
     @FXML
     void GetAllTasks(ActionEvent event) {
+        try {
+            URL url = new URL("http://localhost:8080/api/tasks");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            String response = readResponse(connection);
+            Textarea_Allbox.setText(response);
 
+        } catch (Exception e) {
+            Textarea_Allbox.setText("Error" + e.getMessage());
+        }
     }
-
+    private String readResponse(HttpURLConnection connection) throws IOException {
+        BufferedReader reader;
+        if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300) {
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+        }
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+        reader.close();
+        return response.toString();
+    }
     @FXML
     void UpdateTask(ActionEvent event) {
+        try {
+            // Hämta data från inputfält
+            int id = Integer.parseInt(Input_TaskID.getText());
+            String name = Input_TaskName.getText();
+            String description = Input_Description.getText();
+            String date = Input_Date.getText();
 
+            // Skapa en Task-objekt
+            Task updatedTask = new Task(id, name, description, date);
+
+            // Konvertera Task-objektet till JSON med ObjectMapper
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonPayload = mapper.writeValueAsString(updatedTask);
+
+            // Skicka PUT-begäran till backend
+            URL url = new URL("http://localhost:8080/api/tasks/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            // Skriv JSON-data till begäran
+            try (var os = connection.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            // Läs svar från servern
+            String response = readResponse(connection);
+            Textarea_Allbox.setText("Task updated successfully:\n" + response);
+
+        } catch (NumberFormatException e) {
+            Textarea_Allbox.setText("Error: Invalid ID format.");
+        } catch (Exception e) {
+            Textarea_Allbox.setText("Error: " + e.getMessage());
+        }
     }
 
 }
+
+        // Gör hela popup-fönstret synligt
+//        popupPane.setVisible(true);
+
+
+//    @FXML
+//    void confirmDeleteButton(ActionEvent event) {
+//        try {
+//            // Läs Task ID från popupen
+//            int id = Integer.parseInt(Input_TaskID.getText());
+//
+//            // Skicka DELETE-begäran till backend
+//            URL url = new URL("http://localhost:8080/api/tasks/" + id);
+//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//            connection.setRequestMethod("DELETE");
+//
+//            int responseCode = connection.getResponseCode();
+//            if (responseCode == HttpURLConnection.HTTP_OK) {
+//                String response = readResponse(connection);
+//                Textarea_Allbox.setText("Task deleted successfully: " + response);
+//            } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+//                Textarea_Allbox.setText("Task with ID " + id + " not found.");
+//            } else {
+//                Textarea_Allbox.setText("Failed to delete task. HTTP response code: " + responseCode);
+//            }
+//
+//            // Dölj popupen och rensa inputfältet
+//            Input_TaskID.clear();
+//            Input_TaskID.setVisible(false);
+//
+//        } catch (NumberFormatException e) {
+//            Input_TaskID.setPromptText("Invalid ID"); // Felmeddelande för ogiltigt ID
+//        } catch (Exception e) {
+//            Textarea_Allbox.setText("Error: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
+
+
+//    @FXML
+//    void DeleteTask(ActionEvent event) {
+//        try {
+//            // Läs ID från textfältet
+//            int id = Integer.parseInt(Input_Id.getText());
+//
+//            // Konfigurera HTTP DELETE-begäran
+//            URL url = new URL("http://localhost:8080/api/tasks/" + id);
+//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//            connection.setRequestMethod("DELETE");
+//
+//            // Hantera serverns svar
+//            int responseCode = connection.getResponseCode();
+//            if (responseCode == HttpURLConnection.HTTP_OK) { // 200 OK
+//                String response = readResponse(connection);
+//                Textarea_Allbox.setText("Task deleted successfully: " + response);
+//            } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) { // 404 Not Found
+//                Textarea_Allbox.setText("Task with ID " + id + " not found.");
+//            } else {
+//                Textarea_Allbox.setText("Failed to delete task. HTTP response code: " + responseCode);
+//            }
+//
+//        } catch (Exception e) {
+//            Textarea_Allbox.setText("Error: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
+
+
+
+
+
