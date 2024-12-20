@@ -6,7 +6,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,15 +14,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public class HelloController {
-//    @FXML
-//    private AnchorPane popupPane; // Popup-fönster (Task ID input area)
-//    @FXML
-//    private TextField Input_TaskID; // TextField för Task ID i popupen
 
     @FXML
     private TextField Input_TaskID;
@@ -197,74 +191,3 @@ public class HelloController {
     }
 
 }
-
-        // Gör hela popup-fönstret synligt
-//        popupPane.setVisible(true);
-
-
-//    @FXML
-//    void confirmDeleteButton(ActionEvent event) {
-//        try {
-//            // Läs Task ID från popupen
-//            int id = Integer.parseInt(Input_TaskID.getText());
-//
-//            // Skicka DELETE-begäran till backend
-//            URL url = new URL("http://localhost:8080/api/tasks/" + id);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setRequestMethod("DELETE");
-//
-//            int responseCode = connection.getResponseCode();
-//            if (responseCode == HttpURLConnection.HTTP_OK) {
-//                String response = readResponse(connection);
-//                Textarea_Allbox.setText("Task deleted successfully: " + response);
-//            } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-//                Textarea_Allbox.setText("Task with ID " + id + " not found.");
-//            } else {
-//                Textarea_Allbox.setText("Failed to delete task. HTTP response code: " + responseCode);
-//            }
-//
-//            // Dölj popupen och rensa inputfältet
-//            Input_TaskID.clear();
-//            Input_TaskID.setVisible(false);
-//
-//        } catch (NumberFormatException e) {
-//            Input_TaskID.setPromptText("Invalid ID"); // Felmeddelande för ogiltigt ID
-//        } catch (Exception e) {
-//            Textarea_Allbox.setText("Error: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
-
-
-//    @FXML
-//    void DeleteTask(ActionEvent event) {
-//        try {
-//            // Läs ID från textfältet
-//            int id = Integer.parseInt(Input_Id.getText());
-//
-//            // Konfigurera HTTP DELETE-begäran
-//            URL url = new URL("http://localhost:8080/api/tasks/" + id);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setRequestMethod("DELETE");
-//
-//            // Hantera serverns svar
-//            int responseCode = connection.getResponseCode();
-//            if (responseCode == HttpURLConnection.HTTP_OK) { // 200 OK
-//                String response = readResponse(connection);
-//                Textarea_Allbox.setText("Task deleted successfully: " + response);
-//            } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) { // 404 Not Found
-//                Textarea_Allbox.setText("Task with ID " + id + " not found.");
-//            } else {
-//                Textarea_Allbox.setText("Failed to delete task. HTTP response code: " + responseCode);
-//            }
-//
-//        } catch (Exception e) {
-//            Textarea_Allbox.setText("Error: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
-
-
-
-
-
